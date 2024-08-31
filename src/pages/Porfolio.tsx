@@ -1,9 +1,12 @@
 import { useContext, useEffect } from "react";
 import { DataContext, ContextProps } from "../context";
+import withTransition from "../components/custom/Transition";
 
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 import Navbar from "../components/custom/Navbar";
+import { Badge } from "../components/ui/badge";
+import ReactPlayer from "react-player";
 
 const Porfolio: React.FC = () => {
   const { getMeta, projects, getAllProjects } =
@@ -28,12 +31,21 @@ const Porfolio: React.FC = () => {
               <div
                 className="flex flex-col gap-3 justify-center"
                 key={project.node.id}>
+                <div className="relative">
+                  {project.node.media ? (
+                    <>
+                      <ReactPlayer url={project.node.links} width="100%" />
+                    </>
+                  ) : (
+                    <img
+                      className="rounded-md object-cover"
+                      src={project.node.photo.src}
+                      alt="img1"
+                    />
+                  )}
+                </div>
                 <div>
-                  <img
-                    className="rounded-md object-cover"
-                    src={project.node.photo.src}
-                    alt="img1"
-                  />
+                  <Badge>{project.node.categories}</Badge>
                 </div>
                 <h1 className="text-lg font-semibold">{project.node.title}</h1>
                 <p className="text-zinc-400">{project.node.description}</p>
@@ -50,4 +62,4 @@ const Porfolio: React.FC = () => {
   );
 };
 
-export default Porfolio;
+export default withTransition(Porfolio);

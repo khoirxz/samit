@@ -16,7 +16,8 @@ export interface Node {
   media: boolean;
   photo: Photo;
   title: string;
-  youtube: string;
+  links: string;
+  categories: string;
 }
 
 export interface Photo {

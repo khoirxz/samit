@@ -1,5 +1,6 @@
 import { useContext, useEffect } from "react";
 import { DataContext, ContextProps } from "../context";
+import Transition from "../components/custom/Transition";
 
 import Navbar from "../components/custom/Navbar";
 
@@ -83,4 +84,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Transition(Home);

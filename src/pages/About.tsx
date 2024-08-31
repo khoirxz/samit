@@ -1,22 +1,23 @@
+import { useContext, useEffect, Suspense } from "react";
 import Navbar from "../components/custom/Navbar";
+import withTransition from "../components/custom/Transition";
+import { RichTextRenderer } from "@caisy/rich-text-react-renderer";
 
-import photoshop from "../assets/images/photoshop.png";
-import premiere from "../assets/images/premiere.png";
-import lightroom from "../assets/images/lightroom.png";
-import filmora from "../assets/images/filmora.svg";
-import canva from "../assets/images/canva.png";
-import capcut from "../assets/images/capcut.png";
-import editing from "../assets/images/editing.png";
-import camera from "../assets/images/camera.png";
-import video from "../assets/images/video.png";
-
-import instagram from "../assets/cinstagram.svg";
-import gmail from "../assets/cgoogle.svg";
-import linkedin from "../assets/clinkein.svg";
-import tiktok from "../assets/ctiktok.svg";
-import wa from "../assets/cwa.svg";
+import { DataContext, ContextProps } from "../context";
+import { Skeleton } from "../components/ui/skeleton";
 
 const About: React.FC = () => {
+  const { getAllAboutPage, getAllAbout } =
+    useContext<ContextProps>(DataContext);
+
+  useEffect(() => {
+    getAllAboutPage();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // console.log(getAllAbout);
+
   return (
     <div className="font-figtree flex flex-col gap-20 min-h-screen bg-white text-black">
       <Navbar />
@@ -25,19 +26,16 @@ const About: React.FC = () => {
           <h1 className="font-semibold text-3xl mb-12">About me</h1>
           <div className="flex flex-col gap-2">
             <h2 className="font-bold text-2xl">Hi...</h2>
-            <p className="text-lg">
-              My name is M. Dimas Arif Saputra, I am a fresh graduate from
-              Malang College of Engineering majoring in Electrical Engineering
-              with a concentration in Multimedia Broadcasting.
-            </p>
-            <p className="text-lg">
-              I have an interest in the creative industry such as television,
-              social media content, film, videography, video editing and other
-              things related to the creative industry. I have experience working
-              as a program and production staff at Agropolitan TV for 3 years,
-              apart from that I also have experience managing the GR eSports
-              Instagram account.
-            </p>
+            <Suspense
+              fallback={
+                <>
+                  <Skeleton className="h-5" />
+                </>
+              }>
+              <RichTextRenderer
+                node={getAllAbout.About.descriptionAbout.json}
+              />
+            </Suspense>
           </div>
         </div>
       </div>
@@ -49,28 +47,24 @@ const About: React.FC = () => {
           <h1 className="font-semibold text-3xl mb-12 text-center">
             What I Am Great at
           </h1>
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-col items-center gap-2">
-              <img src={editing} alt="editing" className="w-20 h-20 mx-auto" />
-              <div>
-                <h2 className="text-center font-bold">Video editor</h2>
-                <p>Lorem ipsum dolor sit amet</p>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <img src={camera} alt="editing" className="w-20 h-20 mx-auto" />
-              <div>
-                <h2 className="text-center font-bold">Graphic design</h2>
-                <p>Lorem ipsum dolor sit amet</p>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <img src={video} alt="editing" className="w-20 h-20 mx-auto" />
-              <div>
-                <h2 className="text-center font-bold">Videographer</h2>
-                <p>Lorem ipsum dolor sit amet</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+            <Suspense fallback={null}>
+              {getAllAbout.allServices.edges.map((service, i) => (
+                <div className="flex flex-col items-center gap-2" key={i}>
+                  <img
+                    src={service.node.icon.src}
+                    alt="editing"
+                    className="w-20 h-20 mx-auto"
+                  />
+                  <div>
+                    <h2 className="text-center font-bold">
+                      {service.node.title}
+                    </h2>
+                    <p>{service.node.shortDescription}</p>
+                  </div>
+                </div>
+              ))}
+            </Suspense>
           </div>
         </div>
       </div>
@@ -82,21 +76,15 @@ const About: React.FC = () => {
           <h1 className="font-semibold text-3xl mb-12 text-center">
             What I do
           </h1>
-          <div className="flex flex-row items-center justify-between">
-            <img src={premiere} alt="premiere" className="w-20 h-20" />
-            <img src={photoshop} alt="photoshop" className="w-20 h-20" />
-            <img src={lightroom} alt="lightroom" className="w-20 h-20" />
-            <img
-              src={filmora}
-              alt="lightroom"
-              className="w-20 h-20 rounded-xl"
-            />
-            <img src={canva} alt="lightroom" className="w-20 h-20 rounded-xl" />
-            <img
-              src={capcut}
-              alt="lightroom"
-              className="w-20 h-20 rounded-xl"
-            />
+          <div className="flex flex-row flex-wrap gap-5 items-center justify-between">
+            {getAllAbout.allSkill.edges.map((skill, i) => (
+              <img
+                key={i}
+                src={skill.node.icon.src}
+                alt={skill.node.name}
+                className="w-20 h-20"
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -109,33 +97,19 @@ const About: React.FC = () => {
             Experience
           </h1>
           <div className="flex flex-col gap-3">
-            <span className="py-1 px-3 border-b border-gray-50/15 flex justify-between">
-              <div>
-                <h2 className="font-semibold text-lg">Adobe Photoshop</h2>
-                <p className="font-light">Lorem ipsum dolor sit amet.</p>
-              </div>
-              <div>
-                <p>2023-2024</p>
-              </div>
-            </span>
-            <span className="py-1 px-3 border-b border-gray-50/15 flex justify-between">
-              <div>
-                <h2 className="font-semibold text-lg">Adobe Photoshop</h2>
-                <p className="font-light">Lorem ipsum dolor sit amet.</p>
-              </div>
-              <div>
-                <p>2023-2024</p>
-              </div>
-            </span>
-            <span className="py-1 px-3 border-b border-gray-50/15 flex justify-between">
-              <div>
-                <h2 className="font-semibold text-lg">Adobe Photoshop</h2>
-                <p className="font-light">Lorem ipsum dolor sit amet.</p>
-              </div>
-              <div>
-                <p>2023-2024</p>
-              </div>
-            </span>
+            {getAllAbout.allExperience.edges.map((exp, i) => (
+              <span
+                className="py-1 px-3 border-b border-gray-50/15 flex justify-between"
+                key={i}>
+                <div>
+                  <h2 className="font-semibold text-lg">{exp.node.name}</h2>
+                  <p className="font-light">{exp.node.description}</p>
+                </div>
+                <div>
+                  <p>{exp.node.year}</p>
+                </div>
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -147,27 +121,19 @@ const About: React.FC = () => {
           <h1 className="font-semibold text-3xl mb-12 text-center">
             Ways to Contact Me
           </h1>
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-col gap-2 justify-center items-center">
-              <img src={instagram} alt="instagram" className="w-11 h-11" />
-              <p>@instagram</p>
-            </div>
-            <div className="flex flex-col gap-2 justify-center items-center">
-              <img src={gmail} alt="instagram" className="w-11 h-11" />
-              <p>@instagram</p>
-            </div>
-            <div className="flex flex-col gap-2 justify-center items-center">
-              <img src={linkedin} alt="instagram" className="w-11 h-11" />
-              <p>@instagram</p>
-            </div>
-            <div className="flex flex-col gap-2 justify-center items-center">
-              <img src={tiktok} alt="instagram" className="w-11 h-11" />
-              <p>@instagram</p>
-            </div>
-            <div className="flex flex-col gap-2 justify-center items-center">
-              <img src={wa} alt="instagram" className="w-11 h-11" />
-              <p>@instagram</p>
-            </div>
+          <div className="flex flex-row flex-wrap gap-4 items-center justify-between">
+            {getAllAbout.allContact.edges.map((contact, i) => (
+              <div
+                key={i}
+                className="flex flex-col gap-2 justify-center items-center">
+                <img
+                  src={contact.node.icon.src}
+                  alt={contact.node.title}
+                  className="w-8 h-8 md:w-11 md:h-11"
+                />
+                <p>{contact.node.title}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -178,4 +144,4 @@ const About: React.FC = () => {
   );
 };
 
-export default About;
+export default withTransition(About);

@@ -2,6 +2,11 @@ import React, { useState, createContext, ReactNode } from "react";
 import { gql, GraphQLClient } from "graphql-request";
 import { Meta } from "./types/meta";
 import { AllProjectsProps } from "./types/projects";
+import { AllServicesProps } from "./types/services";
+import { AllSkillProps } from "./types/skills";
+import { AllExperienceProps } from "./types/experience";
+import { AllContactProps } from "./types/contact";
+import { AboutProps } from "./types/about";
 
 const client = new GraphQLClient(
   `https://cloud.caisy.io/api/v3/e/${import.meta.env.VITE_PROJECT_ID}/graphql`,
@@ -12,11 +17,21 @@ const client = new GraphQLClient(
   }
 );
 
+export interface getAboutPage {
+  allServices: AllServicesProps;
+  allSkill: AllSkillProps;
+  allExperience: AllExperienceProps;
+  allContact: AllContactProps;
+  About: AboutProps;
+}
+
 export interface ContextProps {
   meta: Meta;
   projects: AllProjectsProps;
   getMeta: () => Promise<void>;
   getAllProjects: () => Promise<void>;
+  getAllAbout: getAboutPage;
+  getAllAboutPage: () => Promise<void>;
 }
 
 const DataContext = createContext<ContextProps>({
@@ -45,6 +60,29 @@ const DataContext = createContext<ContextProps>({
   } as AllProjectsProps,
   getMeta: async () => {},
   getAllProjects: async () => {},
+  getAllAbout: {
+    allContact: {
+      edges: [],
+    },
+    allExperience: {
+      edges: [],
+    },
+    allServices: {
+      edges: [],
+    },
+    allSkill: {
+      edges: [],
+    },
+    About: {
+      descriptionAbout: {
+        json: {
+          content: [],
+          type: "",
+        },
+      },
+    },
+  },
+  getAllAboutPage: async () => {},
 });
 
 const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -71,6 +109,13 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       edges: [],
     },
   } as AllProjectsProps);
+  const [getAllAbout, setGetAllAbout] = useState<getAboutPage>({
+    allServices: { edges: [] },
+    allContact: { edges: [] },
+    allExperience: { edges: [] },
+    allSkill: { edges: [] },
+    About: { descriptionAbout: { json: { content: [], type: "" } } },
+  });
 
   const getMeta = async () => {
     const gqlResponse: Meta = await client.request(gql`
@@ -104,9 +149,11 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
             node {
               description
               id
+              categories
               media
               title
-              youtube
+              links
+              media
               photo {
                 height
                 width
@@ -120,8 +167,81 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setProjects(gqlResponse);
   };
 
+  const getAllAboutPage = async () => {
+    const gqlResponse: getAboutPage = await client.request(
+      gql`
+        query getAllServices {
+          About {
+            descriptionAbout {
+              json
+            }
+          }
+          allServices {
+            edges {
+              node {
+                id
+                shortDescription
+                title
+                icon {
+                  id
+                  src
+                  title
+                }
+              }
+            }
+          }
+          allSkill {
+            edges {
+              node {
+                name
+                id
+                icon {
+                  src
+                  title
+                }
+              }
+            }
+          }
+          allExperience {
+            edges {
+              node {
+                description
+                id
+                name
+                year
+              }
+            }
+          }
+          allContact {
+            edges {
+              node {
+                title
+                link
+                id
+                icon {
+                  title
+                  src
+                }
+              }
+            }
+          }
+        }
+      `
+    );
+
+    setGetAllAbout(gqlResponse);
+  };
+
   return (
-    <DataContext.Provider value={{ meta, getMeta, projects, getAllProjects }}>
+    <DataContext.Provider
+      value={{
+        meta,
+        getMeta,
+        projects,
+        getAllProjects,
+        getAllAboutPage,
+        getAllAbout,
+      }}>
       {children}
     </DataContext.Provider>
   );
