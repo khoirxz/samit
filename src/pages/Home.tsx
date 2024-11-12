@@ -10,6 +10,7 @@ import linkedin from "../assets/linkedin.svg";
 import tiktok from "../assets/tiktok.svg";
 import wa from "../assets/whatsapp.svg";
 import Social from "../components/custom/Social";
+import { Skeleton } from "../components/ui/skeleton";
 
 const Home: React.FC = () => {
   const { getMeta, meta, getAllProjects } =
@@ -30,12 +31,17 @@ const Home: React.FC = () => {
       <div className="max-w-screen-md mx-auto w-full md:gap-0 px-5 md:px-0 relative">
         <div className="bg-transparent rounded-3xl p-10 flex flex-col gap-3 shadow-md relative">
           <div className="absolute top-0 left-0 w-full h-full bg-zinc-950/80 z-10" />
-          <img
-            src={meta.About.backgroundHero.src}
-            loading="lazy"
-            alt="hero"
-            className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
-          />
+          {meta.About.backgroundHero.src === "" ? (
+            <SkeletonCard />
+          ) : (
+            <img
+              src={meta.About.backgroundHero.src}
+              loading="lazy"
+              alt="hero"
+              className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
+            />
+          )}
+
           <div className="z-10 flex flex-col gap-3">
             <span className="absolute top-5 right-5 text-sm py-1 px-3 rounded-full bg-white/10 flex items-center gap-2">
               {meta.About.location}
@@ -51,11 +57,16 @@ const Home: React.FC = () => {
                 />
               </svg>
             </span>
-            <img
-              className="w-20 h-20 object-cover rounded-full"
-              src={meta.About.profile.src}
-              alt={meta.About.title}
-            />
+            {meta.About.profile.src === "" ? (
+              <Skeleton className="w-20 h-20 rounded-full" />
+            ) : (
+              <img
+                className="w-20 h-20 object-cover rounded-full"
+                src={meta.About.profile.src}
+                alt={meta.About.title}
+              />
+            )}
+
             <div className="flex flex-col gap-3 mt-6">
               <h1 className="text-3xl font-bold uppercase">
                 {meta.About.title}
@@ -81,6 +92,12 @@ const Home: React.FC = () => {
         <p className="text-zinc-400">Made with ❤️ by samit and Giwapedia.</p>
       </div>
     </div>
+  );
+};
+
+const SkeletonCard: React.FC = () => {
+  return (
+    <div className="w-full h-full bg-zinc-700 rounded-3xl animate-pulse"></div>
   );
 };
 

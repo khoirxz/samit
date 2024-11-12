@@ -202,7 +202,7 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
               }
             }
           }
-          allExperience {
+          allExperience(sort: { createdAt: DESC }) {
             edges {
               node {
                 description
