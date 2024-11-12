@@ -4,23 +4,16 @@ import withTransition from "../components/custom/Transition";
 
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import Navbar from "../components/custom/Navbar";
 import { Badge } from "../components/ui/badge";
 import ReactPlayer from "react-player";
 
 const Porfolio: React.FC = () => {
-  const { getMeta, projects, getAllProjects } =
+  const { getMeta, projects, getAllProjects, getAllCategories, categories } =
     useContext<ContextProps>(DataContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    getMeta();
-    getAllProjects();
-    setIsLoading(false);
-
-    // ifnore eslint for array denpendency
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // load script tiktok
@@ -29,15 +22,54 @@ const Porfolio: React.FC = () => {
     script.async = true;
     document.body.appendChild(script);
 
+    getMeta();
+    setIsLoading(false);
+    getAllCategories();
+
     return () => {
       document.body.removeChild(script);
     };
-  }, []);
+    // ifnore eslint for array denpendency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    // load script tiktok
+    const script = document.createElement("script");
+    script.src = "https://www.tiktok.com/embed.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    setIsLoading(true);
+    getAllProjects(selectedCategory);
+    setIsLoading(false);
+  }, [selectedCategory]);
 
   return (
     <div className="font-figtree flex flex-col gap-20 min-h-screen bg-zinc-950 text-white">
       <Navbar />
       <div className="max-w-screen-xl mx-auto w-full">
+        <Tabs className="mx-3 mb-5">
+          <TabsList defaultValue="all">
+            <TabsTrigger value="all" onClick={() => setSelectedCategory(null)}>
+              All
+            </TabsTrigger>
+            {Array.from(
+              new Set(
+                categories.allProjects.edges.map(
+                  (project) => project.node.categories
+                )
+              )
+            ).map((category, index) => (
+              <TabsTrigger
+                value={category}
+                key={index}
+                onClick={() => setSelectedCategory(category)}>
+                {category}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
         <ResponsiveMasonry
           className="container"
           columnsCountBreakPoints={{ 768: 1, 1024: 2, 1425: 3 }}>

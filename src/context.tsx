@@ -7,6 +7,7 @@ import { AllSkillProps } from "./types/skills";
 import { AllExperienceProps } from "./types/experience";
 import { AllContactProps } from "./types/contact";
 import { AboutProps } from "./types/about";
+import { AllCategoriesProps } from "./types/categories";
 
 const client = new GraphQLClient(
   `https://cloud.caisy.io/api/v3/e/${import.meta.env.VITE_PROJECT_ID}/graphql`,
@@ -27,11 +28,13 @@ export interface getAboutPage {
 
 export interface ContextProps {
   meta: Meta;
+  categories: AllCategoriesProps;
   projects: AllProjectsProps;
   getMeta: () => Promise<void>;
-  getAllProjects: () => Promise<void>;
+  getAllProjects: (category?: string | null) => Promise<void>;
   getAllAbout: getAboutPage;
   getAllAboutPage: () => Promise<void>;
+  getAllCategories: () => Promise<void>;
 }
 
 const DataContext = createContext<ContextProps>({
@@ -58,6 +61,11 @@ const DataContext = createContext<ContextProps>({
       edges: [],
     },
   } as AllProjectsProps,
+  categories: {
+    allProjects: {
+      edges: [],
+    },
+  } as AllCategoriesProps,
   getMeta: async () => {},
   getAllProjects: async () => {},
   getAllAbout: {
@@ -83,6 +91,7 @@ const DataContext = createContext<ContextProps>({
     },
   },
   getAllAboutPage: async () => {},
+  getAllCategories: async () => {},
 });
 
 const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -102,6 +111,11 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         src: "",
         height: 0,
       },
+    },
+  });
+  const [categories, setCategories] = useState<AllCategoriesProps>({
+    allProjects: {
+      edges: [],
     },
   });
   const [projects, setProjects] = useState<AllProjectsProps>({
@@ -141,30 +155,52 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setMeta(gqlResponse);
   };
 
-  const getAllProjects = async () => {
-    const gqlResponse: AllProjectsProps = await client.request(gql`
-      query getProjects {
-        allProjects {
-          edges {
-            node {
-              description
-              id
-              categories
-              media
-              title
-              links
-              media
-              photo {
-                height
-                width
-                src
+  const getAllProjects = async (category?: string | null) => {
+    const gqlResponse: AllProjectsProps = await client.request(
+      gql`
+        query getProjects {
+          allProjects${
+            category !== null
+              ? `(where: { categories: { eq: ${category}}})`
+              : ""
+          } {
+            edges {
+              node {
+                description
+                id
+                categories
+                media
+                title
+                links
+                photo {
+                  height
+                  width
+                  src
+                }
               }
             }
           }
         }
-      }
-    `);
+      `
+    );
     setProjects(gqlResponse);
+  };
+
+  const getAllCategories = async () => {
+    const gqlResponse: AllProjectsProps = await client.request(
+      gql`
+        query getProjects {
+          allProjects {
+            edges {
+              node {
+                categories
+              }
+            }
+          }
+        }
+      `
+    );
+    setCategories(gqlResponse);
   };
 
   const getAllAboutPage = async () => {
@@ -238,9 +274,11 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         meta,
         getMeta,
         projects,
+        categories,
         getAllProjects,
         getAllAboutPage,
         getAllAbout,
+        getAllCategories,
       }}>
       {children}
     </DataContext.Provider>
